@@ -1,32 +1,38 @@
 import { useEffect, useState } from "react";
-import { getTodos, createTodo, deleteTodo } from "../services/api";
+import { getTodos, createTodo, deleteTodo, updateTodo } from "../services/api";
 import TodoItem from "./TodoItem";
 import TodoForm from "./TodoForm";
+import EditTodoModal from "./EditTodoModal";
+
 
 export default function TodoList({ token }) {
   const [todos, setTodos] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [editingTodo, setEditingTodo] = useState(null);
 
-  useEffect(() => {
-    async function fetchTodos() {
-      try {
-        const data = await getTodos(token);
 
-        const todosArray = Array.isArray(data)
-          ? data
-          : Array.isArray(data.todos)
+
+
+  async function fetchTodos() {
+
+    try {
+      const data = await getTodos(token);
+
+      const todosArray = Array.isArray(data)
+        ? data
+        : Array.isArray(data.todos)
           ? data.todos
           : [];
 
-        setTodos(todosArray);
-      } catch (err) {
-        console.error("Erro ao buscar todos:", err);
-        setTodos([]);
-      } finally {
-        setLoading(false);
-      }
+      setTodos(todosArray);
+    } catch (err) {
+      console.error("Erro ao buscar todos:", err);
+      setTodos([]);
+    } finally {
+      setLoading(false);
     }
-
+  }
+  useEffect(() => {
     fetchTodos();
   }, [token]);
 
@@ -40,6 +46,29 @@ export default function TodoList({ token }) {
     setTodos(todos.filter((t) => t.id !== id));
   }
 
+  function handleEdit(id) {
+    const todo = todos.find((t) => t.id === id);
+
+    if (todo) {
+      setEditingTodo(todo);
+    }
+  }
+
+  async function handleSave(updatedTodo) {
+    try {
+      await updateTodo(
+        updatedTodo.id,
+        updatedTodo,
+        token
+      );
+
+      await fetchTodos();
+
+      setEditingTodo(null);
+    } catch (err) {
+      console.error(err);
+    }
+  }
   if (loading)
     return (
       <p className="text-center text-gray-600 mt-6">
@@ -58,10 +87,21 @@ export default function TodoList({ token }) {
           </p>
         ) : (
           todos.map((t) => (
-            <TodoItem key={t.id} todo={t} onDelete={removeTodo} />
+            <TodoItem key={t.id} todo={t} onDelete={removeTodo} onEdit={handleEdit} />
           ))
         )}
       </ul>
+      <ul mt-6 flex flex-col gap-3>
+        {editingTodo && (
+          <EditTodoModal
+            todo={editingTodo}
+            onSave={handleSave}
+            onClose={() => setEditingTodo(null)}
+          />
+        )}
+
+      </ul>
+
     </div>
   );
 }
