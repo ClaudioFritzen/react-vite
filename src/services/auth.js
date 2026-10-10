@@ -18,7 +18,9 @@ export async function login(email, password) {
     }
 
     const data = await response.json();
-    console.log("🔑 Token recebido:", data);
+
+    localStorage.setItem("access_token", data.access_token);
+    console.log("TOKEN LOGIN:", data.access_token);
     if (!data.access_token) {
         console.error("Erro no backend: Token não retornado");
         throw new Error("Login failed: Token não retornado");
@@ -45,4 +47,10 @@ export async function registerUser({ username, email, password }) {
   }
 
   return res.json();
+}
+
+
+export function logout() {
+  localStorage.removeItem("access_token");
+  window.location.href = "/login";
 }
