@@ -1,4 +1,4 @@
-export default function TodoItem({ todo, onDelete }) {
+export default function TodoItem({ todo, onDelete, onEdit }) {
   const stateColors = {
     draft: "text-gray-500",
     todo: "text-sky-600",
@@ -25,6 +25,13 @@ export default function TodoItem({ todo, onDelete }) {
         className="bg-red-600 hover:bg-red-700 text-white py-1 px-3 rounded-lg text-sm ml-4"
       >
         X
+      </button>
+
+      <button
+        onClick={() => onEdit(todo.id)}
+        className="bg-blue-600 hover:bg-blue-700 text-white py-1 px-3 rounded-lg text-sm ml-4"
+      >
+        Edit
       </button>
     </li>
   );
