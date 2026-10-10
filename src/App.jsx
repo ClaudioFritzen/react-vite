@@ -2,21 +2,21 @@ import { useState } from "react";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
 import TodoList from "./components/TodoList";
+import { logout } from "./services/auth";
 
 export default function App() {
   // Token guardado no navegador
-  const [token, setToken] = useState(localStorage.getItem("token"));
+  const [token, setToken] = useState(localStorage.getItem("access_token"));
 
   // Controla qual página mostrar
   const [page, setPage] = useState(token ? "todos" : "login");
 
   // Quando o login é bem-sucedido
   function handleLogin(token) {
-    localStorage.setItem("token", token);
     setToken(token);
     setPage("todos");
   }
-
+  
   // Logout
   async function handleLogout() {
     try {
@@ -27,9 +27,10 @@ export default function App() {
           Authorization: `Bearer ${token}`,
         },
       });
-    } catch (_) {}
-
-    localStorage.removeItem("token");
+    } catch (_) {
+      console.error("Erro ao fazer logout no backend");
+    }
+    logout();
     setToken(null);
     setPage("login");
   }
